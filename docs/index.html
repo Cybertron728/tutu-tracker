@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - TuTu: Live Delivery Tracker</title>
+    <style>
+        :root {
+            --bg-color: #0f1115;
+            --card-bg: #181b21;
+            --text-primary: #f0f2f5;
+            --text-secondary: #9aa0a6;
+            --accent: #fc8019;
+            --border-color: #272b34;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.65;
+            color: var(--text-primary);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 760px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 36px 40px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        h1 {
+            color: #ffffff;
+            font-size: 28px;
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 24px;
+        }
+        .date {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-bottom: 30px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        h2 {
+            color: #ffffff;
+            font-size: 20px;
+            margin-top: 28px;
+            margin-bottom: 12px;
+        }
+        p, li {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        strong {
+            color: var(--text-primary);
+        }
+        .highlight-box {
+            background: rgba(252, 128, 25, 0.08);
+            border-left: 4px solid var(--accent);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="subtitle">Official Privacy Statement</div>
+        <h1>Privacy Policy</h1>
+        <div class="date">Last updated: October 2026 • TuTu: Live Delivery Tracker</div>
+
+        <div class="highlight-box">
+            <strong>Key Summary:</strong> TuTu performs all delivery tracking, ETA calculations, and OTP parsing <strong>100% on your device</strong>. We do not collect, transmit, store, or sell any of your personal data, messages, or notification content.
+        </div>
+
+        <h2>1. Overview</h2>
+        <p>This Privacy Policy explains how <strong>TuTu: Live Delivery Tracker</strong> ("the App", "we", "us") handles information when you use our mobile and Wear OS applications.</p>
+
+        <h2>2. Data Collection and Processing</h2>
+        <p>TuTu operates on a zero-remote-data architecture:</p>
+        <ul>
+            <li><strong>Notification Listener Access:</strong> To extract delivery countdown minutes, delivery status (e.g., "Out for delivery"), and order confirmation OTPs, TuTu requests the standard Android <code>NotificationListenerService</code> permission.</li>
+            <li><strong>Strict Local Processing:</strong> Notifications from supported food and grocery apps (Swiggy, Zomato, Blinkit, Zepto, and JioMart) are parsed entirely on your physical smartphone using local regular expressions. No notification body or text is ever sent off your device.</li>
+            <li><strong>Non-Delivery Notifications:</strong> All other notifications from personal messaging, banking, or non-delivery applications are strictly ignored and never read, processed, or logged.</li>
+        </ul>
+
+        <h2>3. Smartwatch Synchronization</h2>
+        <p>When an active order is detected, TuTu transmits only the parsed ETA numbers, brand color, and OTP to your paired Wear OS smartwatch using the official Google Play Services Wearable Data Layer. This transmission occurs exclusively over your local Bluetooth / Wi-Fi direct connection.</p>
+
+        <h2>4. Zero Third-Party Analytics and Advertising</h2>
+        <p>TuTu contains no third-party tracking SDKs, no behavioral telemetry, and no advertisements. We have no external servers or cloud databases.</p>
+
+        <h2>5. Permission Revocation & Data Deletion</h2>
+        <p>You can instantly revoke notification access at any time through Android Settings &gt; Apps &gt; Special App Access &gt; Notification Access. Clearing the app storage or uninstalling the app permanently purges all local cache on both your phone and watch.</p>
+
+        <h2>6. Contact Information</h2>
+        <p>If you have any questions or feedback regarding this Privacy Policy, please contact developer support.</p>
+
+        <div class="footer">
+            &copy; 2026 TuTu: Live Delivery Tracker. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>
