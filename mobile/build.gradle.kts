@@ -18,7 +18,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.deliverytracker"
+        applicationId = "tutu.delivery.track"
         minSdk = 26
         targetSdk = 34
         versionCode = 100

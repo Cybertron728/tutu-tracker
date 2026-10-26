@@ -18,7 +18,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.deliverytracker"
+        applicationId = "tutu.delivery.track"
         minSdk = 28 // Wear OS 2.2+ (Watch 4 Classic runs Wear OS 3.0+ / API 30+)
         targetSdk = 34
         versionCode = 101
