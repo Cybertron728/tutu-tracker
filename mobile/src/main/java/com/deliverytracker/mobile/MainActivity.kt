@@ -78,7 +78,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Hidden Easter Egg: Tap "Delivery Hub" 7 times to reveal Developer & Simulation Tools
+        // Only accessible in debug builds; silently ignored in production.
         binding.txtAppTitle.setOnClickListener {
+            if (!BuildConfig.DEBUG) return@setOnClickListener
             val now = System.currentTimeMillis()
             if (now - lastTapTimestamp > 2000L) {
                 devTapCount = 0
@@ -213,6 +215,65 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Test Simulation Actions
+        sheetBinding.btnSheetTestFourOrders.setOnClickListener {
+            val zomato1 = DeliveryOrder(
+                appId = DeliveryOrder.APP_ZOMATO,
+                brandName = "Zomato",
+                colorHex = DeliveryOrder.COLOR_ZOMATO,
+                remainingMinutes = 30,
+                totalMinutes = 45,
+                progress = 0.33f,
+                status = "Preparing your food",
+                title = "Biryani Blues",
+                isActive = true,
+                orderKey = "zomato_biryani_blues",
+                otp = "3819"
+            )
+            val zomato2 = DeliveryOrder(
+                appId = DeliveryOrder.APP_ZOMATO,
+                brandName = "Zomato",
+                colorHex = DeliveryOrder.COLOR_ZOMATO,
+                remainingMinutes = 18,
+                totalMinutes = 35,
+                progress = 0.48f,
+                status = "Rider picked up order",
+                title = "Bakingo Cakes & Desserts",
+                isActive = true,
+                orderKey = "zomato_bakingo"
+            )
+            val swiggy1 = DeliveryOrder(
+                appId = DeliveryOrder.APP_SWIGGY,
+                brandName = "Swiggy",
+                colorHex = DeliveryOrder.COLOR_SWIGGY,
+                remainingMinutes = 25,
+                totalMinutes = 40,
+                progress = 0.37f,
+                status = "Order confirmed",
+                title = "Truffles Burgers & Shakes",
+                isActive = true,
+                orderKey = "swiggy_truffles",
+                otp = "4821"
+            )
+            val swiggy2 = DeliveryOrder(
+                appId = DeliveryOrder.APP_SWIGGY,
+                brandName = "Swiggy",
+                colorHex = DeliveryOrder.COLOR_SWIGGY,
+                remainingMinutes = 8,
+                totalMinutes = 15,
+                progress = 0.75f,
+                status = "Delivery partner on way",
+                title = "Swiggy Instamart",
+                isActive = true,
+                orderKey = "swiggy_instamart"
+            )
+            DeliveryNotificationListenerService.updateOrder(zomato1)
+            DeliveryNotificationListenerService.updateOrder(zomato2)
+            DeliveryNotificationListenerService.updateOrder(swiggy1)
+            DeliveryNotificationListenerService.updateOrder(swiggy2)
+            renderActiveOrders(DeliveryNotificationListenerService.getActiveOrdersList())
+            Toast.makeText(this, "Simulating 4 simultaneous orders (2 Zomato + 2 Swiggy)", Toast.LENGTH_SHORT).show()
+        }
+
         sheetBinding.btnSheetTestZomato.setOnClickListener {
             val testOrder = DeliveryOrder(
                 appId = DeliveryOrder.APP_ZOMATO,

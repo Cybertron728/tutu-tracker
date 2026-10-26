@@ -160,15 +160,18 @@ class DeliveryTileService : TileService() {
         }
         val progressArc = progressArcBuilder.build()
 
-        val isAtLocation = state.remainingMinutes <= 0 ||
+        val isAtLocation = state.isArrived || state.remainingMinutes <= 0 ||
             state.status.contains("location", ignoreCase = true) ||
             state.status.contains("doorstep", ignoreCase = true) ||
             state.status.contains("gate", ignoreCase = true) ||
             state.status.contains("arrived", ignoreCase = true)
-        val isNear = state.status.contains("near", ignoreCase = true)
+        val isNear = state.isNear || state.status.contains("near", ignoreCase = true) || state.remainingMinutes in 1..2
 
         val statusColor = if (isAtLocation || isNear) argb(0xFF4CAF50.toInt()) else argb(0xFFA1A1AA.toInt())
-        val minutesText = "${state.remainingMinutes}m"
+        val minutesText = when {
+            isAtLocation -> "HERE"
+            else -> "${state.remainingMinutes}m"
+        }
 
         val centerColumnBuilder = LayoutElementBuilders.Column.Builder()
             .setHorizontalAlignment(LayoutElementBuilders.HORIZONTAL_ALIGN_CENTER)

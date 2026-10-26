@@ -95,11 +95,23 @@
         android:layout_marginTop="10dp"
         android:orientation="vertical">
 
+        <!-- 4 Simultaneous Orders (2 Zomato + 2 Swiggy) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSheetTestFourOrders"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:backgroundTint="#6366F1"
+            android:text="⚡ Test 4 Orders (2 Zomato + 2 Swiggy)"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            app:cornerRadius="10dp" />
+
         <!-- Zomato Test -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSheetTestZomato"
             android:layout_width="match_parent"
             android:layout_height="48dp"
+            android:layout_marginTop="8dp"
             android:backgroundTint="#E23744"
             android:text="Test Zomato (14 mins remaining)"
             android:textAllCaps="false"

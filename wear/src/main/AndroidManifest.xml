@@ -11,7 +11,7 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="Delivery Tracker"
+        android:label="TuTu Tracker"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DeliveryTracker.Wear">
@@ -62,7 +62,7 @@
         <service
             android:name=".DeliveryTileService"
             android:exported="true"
-            android:label="Delivery Tracker"
+            android:label="TuTu Tracker"
             android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
             <intent-filter>
                 <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />

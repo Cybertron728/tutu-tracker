@@ -29,7 +29,6 @@ android {
 
     signingConfigs {
         create("release") {
-            val storeFilePath = localProperties.getProperty("RELEASE_STORE_FILE") ?: "../keystore/release.jks"
             storeFile = rootProject.file("keystore/release.jks")
             storePassword = localProperties.getProperty("RELEASE_STORE_PASSWORD") ?: "TuTuDelivery2026!"
             keyAlias = localProperties.getProperty("RELEASE_KEY_ALIAS") ?: "tutu"
@@ -62,6 +61,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 

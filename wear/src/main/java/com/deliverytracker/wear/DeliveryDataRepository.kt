@@ -120,17 +120,21 @@ object DeliveryDataRepository {
 
         synchronized(lock) {
             val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-            val lastAlertTime = prefs.getLong(KEY_LAST_ARRIVAL_ALERT_TS, 0L)
-            val lastAppId = prefs.getString("last_arrival_app_id", "") ?: ""
             val lastTimestamp = prefs.getLong("last_arrival_state_ts", 0L)
+            val lastTitle = prefs.getString("last_arrival_title", "") ?: ""
             val now = System.currentTimeMillis()
+            val lastAlertTime = prefs.getLong(KEY_LAST_ARRIVAL_ALERT_TS, 0L)
 
-            if (state.timestamp == lastTimestamp || (state.appId == lastAppId && (now - lastAlertTime < 2500L))) {
-                return false
-            }
+            // Deduplicate: same timestamp OR (same app+title within 2500ms)
+            val sameDelivery = state.timestamp == lastTimestamp ||
+                (state.appId == prefs.getString("last_arrival_app_id", "") &&
+                 state.title == lastTitle &&
+                 (now - lastAlertTime < 2500L))
+            if (sameDelivery) return false
 
             prefs.edit()
                 .putString("last_arrival_app_id", state.appId)
+                .putString("last_arrival_title", state.title)
                 .putLong(KEY_LAST_ARRIVAL_ALERT_TS, now)
                 .putLong("last_arrival_state_ts", state.timestamp)
                 .apply()
@@ -147,17 +151,21 @@ object DeliveryDataRepository {
 
         synchronized(lock) {
             val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-            val lastAlertTime = prefs.getLong(KEY_LAST_NEAR_ALERT_TS, 0L)
-            val lastAppId = prefs.getString("last_near_app_id", "") ?: ""
             val lastTimestamp = prefs.getLong("last_near_state_ts", 0L)
+            val lastTitle = prefs.getString("last_near_title", "") ?: ""
             val now = System.currentTimeMillis()
+            val lastAlertTime = prefs.getLong(KEY_LAST_NEAR_ALERT_TS, 0L)
 
-            if (state.timestamp == lastTimestamp || (state.appId == lastAppId && (now - lastAlertTime < 2500L))) {
-                return false
-            }
+            // Deduplicate: same timestamp OR (same app+title within 2500ms)
+            val sameDelivery = state.timestamp == lastTimestamp ||
+                (state.appId == prefs.getString("last_near_app_id", "") &&
+                 state.title == lastTitle &&
+                 (now - lastAlertTime < 2500L))
+            if (sameDelivery) return false
 
             prefs.edit()
                 .putString("last_near_app_id", state.appId)
+                .putString("last_near_title", state.title)
                 .putLong(KEY_LAST_NEAR_ALERT_TS, now)
                 .putLong("last_near_state_ts", state.timestamp)
                 .apply()

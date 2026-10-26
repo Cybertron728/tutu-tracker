@@ -187,13 +187,13 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        val isAtLocation = state.remainingMinutes <= 0 ||
+        val isAtLocation = state.isArrived || state.remainingMinutes <= 0 ||
             state.status.contains("location", ignoreCase = true) ||
             state.status.contains("doorstep", ignoreCase = true) ||
             state.status.contains("gate", ignoreCase = true) ||
             state.status.contains("arrived", ignoreCase = true)
 
-        val isNear = state.status.contains("near", ignoreCase = true) || state.remainingMinutes == 1
+        val isNear = state.isNear || state.status.contains("near", ignoreCase = true) || state.remainingMinutes <= 2
 
         binding.txtBrandBadge.text = state.brandName.uppercase()
         binding.txtBrandBadge.setTextColor(state.colorHex)
