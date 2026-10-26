@@ -113,6 +113,67 @@ class DeliveryTrackerSimulationTest {
     }
 
     @Test
+    fun testTwoZomatoAndTwoSwiggyOrdersSimultaneously() {
+        // 1. Zomato Order A: Biryani Blues (30 mins)
+        val notifZomato1 = createMockNotification("Biryani Blues", "Order confirmed. Arriving in 30 mins")
+        val zomato1 = DeliveryParser.parse("com.application.zomato", notifZomato1, "0|com.application.zomato|101|null|1000")!!
+
+        // 2. Zomato Order B: Bakingo Cakes (18 mins)
+        val notifZomato2 = createMockNotification("Bakingo Cakes", "Your order is dispatched. Reaching in 18 mins")
+        val zomato2 = DeliveryParser.parse("com.application.zomato", notifZomato2, "0|com.application.zomato|102|null|1000")!!
+
+        // 3. Swiggy Order A: Truffles Burgers (25 mins)
+        val notifSwiggy1 = createMockNotification("Truffles Burgers", "Captain picked up order. Arriving in 25 mins")
+        val swiggy1 = DeliveryParser.parse("in.swiggy.android", notifSwiggy1, "0|in.swiggy.android|201|null|1000")!!
+
+        // 4. Swiggy Order B: Instamart Groceries (8 mins)
+        val notifSwiggy2 = createMockNotification("Swiggy Instamart", "Delivery partner heading towards you. Arriving in 8 mins")
+        val swiggy2 = DeliveryParser.parse("in.swiggy.android", notifSwiggy2, "0|in.swiggy.android|202|null|1000")!!
+
+        // Update all 4 orders into service
+        DeliveryNotificationListenerService.updateOrder(zomato1)
+        DeliveryNotificationListenerService.updateOrder(zomato2)
+        DeliveryNotificationListenerService.updateOrder(swiggy1)
+        DeliveryNotificationListenerService.updateOrder(swiggy2)
+
+        val activeList = DeliveryNotificationListenerService.getActiveOrdersList()
+        assertEquals("All 4 orders (2 Zomato + 2 Swiggy) must be active simultaneously", 4, activeList.size)
+
+        // Verify sorted by ETA:
+        // 1. Instamart (8m)
+        // 2. Bakingo (18m)
+        // 3. Truffles (25m)
+        // 4. Biryani Blues (30m)
+        assertEquals("Swiggy Instamart", activeList[0].title)
+        assertEquals(8, activeList[0].remainingMinutes)
+
+        assertEquals("Bakingo Cakes", activeList[1].title)
+        assertEquals(18, activeList[1].remainingMinutes)
+
+        assertEquals("Truffles Burgers", activeList[2].title)
+        assertEquals(25, activeList[2].remainingMinutes)
+
+        assertEquals("Biryani Blues", activeList[3].title)
+        assertEquals(30, activeList[3].remainingMinutes)
+
+        // Dismiss 1 of the Swiggy orders (Truffles)
+        DeliveryNotificationListenerService.activeOrders.remove(swiggy1.key)
+        val afterDismissSwiggy = DeliveryNotificationListenerService.getActiveOrdersList()
+        assertEquals("Should have 3 orders remaining", 3, afterDismissSwiggy.size)
+        assertTrue(afterDismissSwiggy.any { it.title == "Swiggy Instamart" })
+        assertTrue(afterDismissSwiggy.any { it.title == "Bakingo Cakes" })
+        assertTrue(afterDismissSwiggy.any { it.title == "Biryani Blues" })
+        assertFalse(afterDismissSwiggy.any { it.title == "Truffles Burgers" })
+
+        // Dismiss 1 of the Zomato orders (Bakingo)
+        DeliveryNotificationListenerService.activeOrders.remove(zomato2.key)
+        val afterDismissZomato = DeliveryNotificationListenerService.getActiveOrdersList()
+        assertEquals("Should have 2 orders remaining (1 Zomato, 1 Swiggy)", 2, afterDismissZomato.size)
+        assertEquals("Swiggy Instamart", afterDismissZomato[0].title)
+        assertEquals("Biryani Blues", afterDismissZomato[1].title)
+    }
+
+    @Test
     fun testDeliveredNotificationMarksOrderInactive() {
         val notif = createMockNotification("Truffles Burgers", "Order delivered to you. Enjoy your meal!")
         val order = DeliveryParser.parse("in.swiggy.android", notif, "key_delivered")

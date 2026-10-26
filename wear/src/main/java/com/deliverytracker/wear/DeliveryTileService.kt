@@ -194,9 +194,9 @@ class DeliveryTileService : TileService() {
                     .build()
             )
 
-        // +1 more order badge
+        // +X more order(s) badge
         if (state.otherOrdersCount > 0) {
-            val moreText = "+${state.otherOrdersCount} more order"
+            val moreText = if (state.otherOrdersCount == 1) "+1 more order" else "+${state.otherOrdersCount} more orders"
             centerColumnBuilder.addContent(
                 Text.Builder(this, moreText)
                     .setTypography(Typography.TYPOGRAPHY_CAPTION2)
