@@ -15,13 +15,16 @@ data class WatchDeliveryState(
     val timestamp: Long,
     val otherOrdersCount: Int = 0,
     val allOrdersJson: String = "",
-    val otp: String = ""
+    val otp: String = "",
+    val isArrived: Boolean = false,
+    val isNear: Boolean = false
 )
 
 object DeliveryDataRepository {
 
     private const val PREF_NAME = "wear_delivery_prefs"
-    private const val KEY_LAST_ALERT_TIMESTAMP = "last_alert_timestamp"
+    private const val KEY_LAST_ARRIVAL_ALERT_TS = "last_arrival_alert_ts"
+    private const val KEY_LAST_NEAR_ALERT_TS = "last_near_alert_ts"
     private val lock = Any()  // Guards SharedPreferences against concurrent writes from binder threads
 
     fun saveDeliveryState(context: Context, state: WatchDeliveryState) {
@@ -42,6 +45,8 @@ object DeliveryDataRepository {
                     editor.putInt("other_orders_count", 0)
                     editor.putString("all_orders_json", "")
                     editor.putString("otp", "")
+                    editor.putBoolean("is_arrived", false)
+                    editor.putBoolean("is_near", false)
                     editor.putLong("timestamp", System.currentTimeMillis())
                 } else {
                     editor.putString("app_id", state.appId)
@@ -56,6 +61,8 @@ object DeliveryDataRepository {
                     editor.putInt("other_orders_count", state.otherOrdersCount)
                     editor.putString("all_orders_json", state.allOrdersJson)
                     editor.putString("otp", state.otp)
+                    editor.putBoolean("is_arrived", state.isArrived)
+                    editor.putBoolean("is_near", state.isNear)
                     editor.putLong("timestamp", state.timestamp)
                 }
                 editor.apply()
@@ -80,46 +87,79 @@ object DeliveryDataRepository {
             timestamp = prefs.getLong("timestamp", System.currentTimeMillis()),
             otherOrdersCount = prefs.getInt("other_orders_count", 0),
             allOrdersJson = prefs.getString("all_orders_json", "") ?: "",
-            otp = prefs.getString("otp", "") ?: ""
+            otp = prefs.getString("otp", "") ?: "",
+            isArrived = prefs.getBoolean("is_arrived", false),
+            isNear = prefs.getBoolean("is_near", false)
         )
     }
 
-    fun isNearOrArrived(state: WatchDeliveryState): Boolean {
+    fun isArrived(state: WatchDeliveryState): Boolean {
         if (!state.isActive) return false
-        return state.remainingMinutes <= 0 ||
-               state.status.contains("near", ignoreCase = true) ||
+        if (state.isArrived) return true
+        return (state.remainingMinutes <= 0 ||
                state.status.contains("location", ignoreCase = true) ||
                state.status.contains("doorstep", ignoreCase = true) ||
                state.status.contains("gate", ignoreCase = true) ||
-               state.status.contains("arrived", ignoreCase = true)
+               state.status.contains("arrived", ignoreCase = true)) &&
+               !state.isNear
+    }
+
+    fun isNear(state: WatchDeliveryState): Boolean {
+        if (!state.isActive || isArrived(state)) return false
+        if (state.isNear) return true
+        return state.remainingMinutes in 1..2 ||
+               state.status.contains("near", ignoreCase = true)
     }
 
     /**
-     * Atomically checks if an arrival alert should be triggered (vibrate + popup).
-     * Deduplicates the simultaneous DataClient and MessageClient packet arrival
-     * without permanently blocking subsequent test alerts or new delivery updates.
+     * Atomically checks if an arrival alert should be triggered (strong vibration + persistent popup).
+     * Deduplicates DataClient and MessageClient races within 2500ms.
      */
     fun checkAndMarkArrivalAlert(context: Context, state: WatchDeliveryState): Boolean {
-        if (!isNearOrArrived(state)) return false
+        if (!isArrived(state)) return false
 
         synchronized(lock) {
             val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-            val lastAlertTime = prefs.getLong(KEY_LAST_ALERT_TIMESTAMP, 0L)
-            val lastAppId = prefs.getString("last_alert_app_id", "") ?: ""
-            val lastTimestamp = prefs.getLong("last_alert_state_ts", 0L)
+            val lastAlertTime = prefs.getLong(KEY_LAST_ARRIVAL_ALERT_TS, 0L)
+            val lastAppId = prefs.getString("last_arrival_app_id", "") ?: ""
+            val lastTimestamp = prefs.getLong("last_arrival_state_ts", 0L)
             val now = System.currentTimeMillis()
 
-            // Deduplicate if this exact state timestamp was already processed (DataClient + MessageClient race)
-            // or if an alert fired within the last 2500ms for this exact app and timestamp
             if (state.timestamp == lastTimestamp || (state.appId == lastAppId && (now - lastAlertTime < 2500L))) {
                 return false
             }
 
-            // Record this alert
             prefs.edit()
-                .putString("last_alert_app_id", state.appId)
-                .putLong(KEY_LAST_ALERT_TIMESTAMP, now)
-                .putLong("last_alert_state_ts", state.timestamp)
+                .putString("last_arrival_app_id", state.appId)
+                .putLong(KEY_LAST_ARRIVAL_ALERT_TS, now)
+                .putLong("last_arrival_state_ts", state.timestamp)
+                .apply()
+            return true
+        }
+    }
+
+    /**
+     * Atomically checks if a near alert should be triggered (gentle vibration + 10s auto-dismiss popup).
+     * Deduplicates DataClient and MessageClient races within 2500ms.
+     */
+    fun checkAndMarkNearAlert(context: Context, state: WatchDeliveryState): Boolean {
+        if (!isNear(state)) return false
+
+        synchronized(lock) {
+            val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            val lastAlertTime = prefs.getLong(KEY_LAST_NEAR_ALERT_TS, 0L)
+            val lastAppId = prefs.getString("last_near_app_id", "") ?: ""
+            val lastTimestamp = prefs.getLong("last_near_state_ts", 0L)
+            val now = System.currentTimeMillis()
+
+            if (state.timestamp == lastTimestamp || (state.appId == lastAppId && (now - lastAlertTime < 2500L))) {
+                return false
+            }
+
+            prefs.edit()
+                .putString("last_near_app_id", state.appId)
+                .putLong(KEY_LAST_NEAR_ALERT_TS, now)
+                .putLong("last_near_state_ts", state.timestamp)
                 .apply()
             return true
         }

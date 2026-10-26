@@ -165,10 +165,13 @@ object DeliveryParser {
             else -> 0.5f
         }
 
+        val isArrived = isAtLocation || minutes == 0
+        val isNear = !isArrived && (isNearLocation || minutes in 1..2)
+
         val statusText = when {
-            isAtLocation || minutes == 0 -> "At your location!"
-            isNearLocation -> if (appId == DeliveryOrder.APP_SWIGGY) "Captain is near you!" else "Delivery boy is near you!"
-            minutes <= 2 -> "Arriving at doorstep"
+            isArrived -> "At your location!"
+            isNearLocation -> if (appId == DeliveryOrder.APP_SWIGGY) "Captain is near you!" else "Delivery partner is near you!"
+            minutes <= 2 -> "Arriving in ${minutes}m"
             minutes <= 5 -> "Almost there"
             text.isNotEmpty() -> text.take(30)
             else -> "Out for delivery"
@@ -192,7 +195,9 @@ object DeliveryParser {
             title = orderTitle,
             isActive = true,
             otp = otp,
-            orderKey = orderKey
+            orderKey = orderKey,
+            isArrived = isArrived,
+            isNear = isNear
         )
     }
 

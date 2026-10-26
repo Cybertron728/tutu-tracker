@@ -50,7 +50,9 @@ class WearDataListenerService : WearableListenerService() {
                     timestamp = dataMap.getLong("timestamp", System.currentTimeMillis()),
                     otherOrdersCount = dataMap.getInt("other_orders_count", 0),
                     allOrdersJson = dataMap.getString("all_orders_json", ""),
-                    otp = dataMap.getString("otp", "")
+                    otp = dataMap.getString("otp", ""),
+                    isArrived = dataMap.getBoolean("is_arrived", false),
+                    isNear = dataMap.getBoolean("is_near", false)
                 )
 
                 applyNewDeliveryState(state)
@@ -77,7 +79,9 @@ class WearDataListenerService : WearableListenerService() {
                     timestamp = json.optLong("timestamp", System.currentTimeMillis()),
                     otherOrdersCount = json.optInt("other_orders_count", 0),
                     allOrdersJson = json.optString("all_orders_json", ""),
-                    otp = json.optString("otp", "")
+                    otp = json.optString("otp", ""),
+                    isArrived = json.optBoolean("is_arrived", false),
+                    isNear = json.optBoolean("is_near", false)
                 )
                 applyNewDeliveryState(state)
             } catch (e: Exception) {
@@ -89,11 +93,22 @@ class WearDataListenerService : WearableListenerService() {
     private fun applyNewDeliveryState(state: WatchDeliveryState) {
         Log.d(TAG, "Received delivery update: ${state.brandName} - ${state.remainingMinutes}m remaining (${state.status})")
 
-        // Trigger arrival alert (single vibration + full-screen popup)
-        val shouldAlert = DeliveryDataRepository.checkAndMarkArrivalAlert(applicationContext, state)
-        if (shouldAlert) {
-            triggerArrivalVibration()
-            showArrivalPopup(state)
+        // Auto-dismiss arrival alert if parcel is received or cleared
+        if (!state.isActive || state.status.contains("delivered", ignoreCase = true)) {
+            ArrivalAlertActivity.dismissIfActive()
+        }
+
+        // Trigger arrival (strong) or near (gentle) alert based on status
+        val isArrivedAlert = DeliveryDataRepository.checkAndMarkArrivalAlert(applicationContext, state)
+        if (isArrivedAlert) {
+            triggerStrongArrivalVibration()
+            showArrivalPopup(state, isArrived = true)
+        } else {
+            val isNearAlert = DeliveryDataRepository.checkAndMarkNearAlert(applicationContext, state)
+            if (isNearAlert) {
+                triggerGentleNearVibration()
+                showArrivalPopup(state, isArrived = false)
+            }
         }
 
         // Save delivery state to SharedPreferences
@@ -123,42 +138,66 @@ class WearDataListenerService : WearableListenerService() {
         }
     }
 
-    private fun triggerArrivalVibration() {
+    private fun triggerGentleNearVibration() {
         try {
-            // Single, clean tactile vibration pulse (450ms)
+            // Subtle, gentle buzz for 2-min / near alert (~120ms gentle pulse)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
-                val effect = VibrationEffect.createOneShot(450L, VibrationEffect.DEFAULT_AMPLITUDE)
+                val effect = VibrationEffect.createOneShot(120L, 90)
                 vibratorManager?.vibrate(CombinedVibration.createParallel(effect))
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+                val effect = VibrationEffect.createOneShot(120L, 90)
+                vibrator?.vibrate(effect)
             } else {
                 @Suppress("DEPRECATION")
                 val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    val effect = VibrationEffect.createOneShot(450L, VibrationEffect.DEFAULT_AMPLITUDE)
-                    vibrator?.vibrate(effect)
-                } else {
-                    @Suppress("DEPRECATION")
-                    vibrator?.vibrate(450L)
-                }
+                vibrator?.vibrate(120L)
             }
-            Log.i(TAG, "Single arrival vibration triggered on watch")
+            Log.i(TAG, "Gentle near vibration triggered on watch")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to vibrate watch", e)
+            Log.e(TAG, "Failed to vibrate gentle near", e)
         }
     }
 
-    private fun showArrivalPopup(state: WatchDeliveryState) {
+    private fun triggerStrongArrivalVibration() {
+        try {
+            // Distinct, firm double-pulse vibration pattern (0ms delay, 350ms pulse, 150ms pause, 450ms pulse)
+            val timings = longArrayOf(0, 350, 150, 450)
+            val amplitudes = intArrayOf(0, 255, 0, 255)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+                val effect = VibrationEffect.createWaveform(timings, amplitudes, -1)
+                vibratorManager?.vibrate(CombinedVibration.createParallel(effect))
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+                val effect = VibrationEffect.createWaveform(timings, amplitudes, -1)
+                vibrator?.vibrate(effect)
+            } else {
+                @Suppress("DEPRECATION")
+                val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+                vibrator?.vibrate(timings, -1)
+            }
+            Log.i(TAG, "Strong arrival vibration triggered on watch")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to vibrate strong arrival", e)
+        }
+    }
+
+    private fun showArrivalPopup(state: WatchDeliveryState, isArrived: Boolean) {
+        val alertMessage = if (isArrived) {
+            if (state.brandName.contains("swiggy", ignoreCase = true)) "Captain at your doorstep!" else "Rider at your location!"
+        } else {
+            if (state.brandName.contains("swiggy", ignoreCase = true)) "Captain is near you!" else "Delivery partner is near you!"
+        }
+
         val intent = Intent(applicationContext, ArrivalAlertActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             putExtra(ArrivalAlertActivity.EXTRA_BRAND_NAME, state.brandName)
             putExtra(ArrivalAlertActivity.EXTRA_COLOR_HEX, state.colorHex)
             putExtra(ArrivalAlertActivity.EXTRA_TITLE, state.title)
-            val msg = if (state.brandName.contains("swiggy", ignoreCase = true)) {
-                "Captain is near you!"
-            } else {
-                "Delivery boy is near you!"
-            }
-            putExtra(ArrivalAlertActivity.EXTRA_MESSAGE, msg)
+            putExtra(ArrivalAlertActivity.EXTRA_MESSAGE, alertMessage)
+            putExtra(ArrivalAlertActivity.EXTRA_IS_ARRIVED, isArrived)
         }
 
         // 1. Post High-Priority Full-Screen Intent Notification
@@ -173,12 +212,10 @@ class WearDataListenerService : WearableListenerService() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            val alertText = if (state.brandName.contains("swiggy", ignoreCase = true)) "Captain is near you!" else "Delivery boy is near you!"
-
             val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ARRIVAL)
                 .setSmallIcon(R.drawable.tile_preview)
                 .setContentTitle("${state.brandName.uppercase()} Alert")
-                .setContentText(alertText)
+                .setContentText(alertMessage)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setFullScreenIntent(pendingIntent, true)
@@ -186,7 +223,7 @@ class WearDataListenerService : WearableListenerService() {
                 .build()
 
             NotificationManagerCompat.from(applicationContext).notify(NOTIFICATION_ID_ARRIVAL, notification)
-            Log.i(TAG, "Posted fullScreenIntent notification for arrival on watch")
+            Log.i(TAG, "Posted fullScreenIntent notification (isArrived=$isArrived) on watch")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to post arrival notification", e)
         }
@@ -194,7 +231,7 @@ class WearDataListenerService : WearableListenerService() {
         // 2. Also attempt direct startActivity
         try {
             applicationContext.startActivity(intent)
-            Log.i(TAG, "Called direct startActivity for ArrivalAlertActivity")
+            Log.i(TAG, "Called direct startActivity for ArrivalAlertActivity (isArrived=$isArrived)")
         } catch (e: Exception) {
             Log.w(TAG, "Direct startActivity restricted (fullScreenIntent will handle presentation)", e)
         }

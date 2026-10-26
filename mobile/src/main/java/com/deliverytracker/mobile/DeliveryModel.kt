@@ -12,7 +12,9 @@ data class DeliveryOrder(
     val isActive: Boolean,
     val otp: String? = null,
     val timestamp: Long = System.currentTimeMillis(),
-    val orderKey: String = ""
+    val orderKey: String = "",
+    val isArrived: Boolean = false,
+    val isNear: Boolean = false
 ) {
     val key: String
         get() = if (orderKey.isNotEmpty()) orderKey else "${appId}_${title.lowercase().trim().replace(Regex("[^a-z0-9]"), "_")}"

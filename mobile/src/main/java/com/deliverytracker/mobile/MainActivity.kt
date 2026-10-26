@@ -297,13 +297,15 @@ class MainActivity : AppCompatActivity() {
                 appId = DeliveryOrder.APP_SWIGGY,
                 brandName = "Swiggy",
                 colorHex = DeliveryOrder.COLOR_SWIGGY,
-                remainingMinutes = 1,
+                remainingMinutes = 2,
                 totalMinutes = 35,
                 progress = 0.95f,
                 status = "Captain is near you!",
                 title = "Truffles Burgers & Shakes",
                 isActive = true,
-                otp = "4821"
+                otp = "4821",
+                isNear = true,
+                isArrived = false
             )
             triggerTestOrder(nearOrder)
         }
@@ -319,7 +321,9 @@ class MainActivity : AppCompatActivity() {
                 status = "Rider at your location!",
                 title = "Biryani Blues",
                 isActive = true,
-                otp = "3819"
+                otp = "3819",
+                isNear = false,
+                isArrived = true
             )
             triggerTestOrder(arrivalOrder)
         }
