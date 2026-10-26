@@ -15,13 +15,13 @@ val localProperties = Properties().apply {
 
 android {
     namespace = "com.deliverytracker.wear"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "tutu.delivery.track"
         minSdk = 28 // Wear OS 2.2+ (Watch 4 Classic runs Wear OS 3.0+ / API 30+)
-        targetSdk = 34
-        versionCode = 101
+        targetSdk = 36
+        versionCode = 103
         versionName = "1.0.0"
     }
 

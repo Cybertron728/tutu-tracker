@@ -15,13 +15,13 @@ val localProperties = Properties().apply {
 
 android {
     namespace = "com.deliverytracker.mobile"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "tutu.delivery.track"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 100
+        targetSdk = 36
+        versionCode = 102
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
