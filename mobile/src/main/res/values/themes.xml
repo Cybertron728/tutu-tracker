@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.DeliveryTracker" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#E23744</item>
+        <item name="colorPrimaryVariant">#B8202D</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="android:statusBarColor">#121212</item>
+        <item name="android:navigationBarColor">#121212</item>
+    </style>
+</resources>

@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#16181C"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <!-- Drag Handle -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:background="#444444" />
+
+    <!-- Sheet Header -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🛠️ Developer &amp; Simulation Lab"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Simulate delivery notifications to test your Galaxy Watch 4 Classic without placing real orders."
+        android:textColor="#8E929B"
+        android:textSize="13sp" />
+
+    <!-- Watch Connection Status Card inside Sheet -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:cardBackgroundColor="#20232A"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="0dp"
+        app:strokeColor="#303540"
+        app:strokeWidth="1dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_watch"
+                app:tint="#4CAF50" />
+
+            <TextView
+                android:id="@+id/txtSheetWatchStatus"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:text="Checking Galaxy Watch connection..."
+                android:textColor="#DDDDDD"
+                android:textSize="12sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRefreshWatchStatus"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:padding="0dp"
+                android:text="Refresh"
+                android:textAllCaps="false"
+                android:textColor="#64B5F6"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="SIMULATE ACTIVE DELIVERIES"
+        android:textColor="#7A7E85"
+        android:textSize="11sp"
+        android:textStyle="bold" />
+
+    <!-- Grid / List of Simulation Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical">
+
+        <!-- Zomato Test -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSheetTestZomato"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:backgroundTint="#E23744"
+            android:text="Test Zomato (14 mins remaining)"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            app:cornerRadius="10dp" />
+
+        <!-- Swiggy Test -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSheetTestSwiggy"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="#FC8019"
+            android:text="Test Swiggy (22 mins remaining)"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            app:cornerRadius="10dp" />
+
+        <!-- Blinkit Test -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSheetTestBlinkit"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="#F8CB46"
+            android:text="Test Blinkit (7 mins remaining)"
+            android:textAllCaps="false"
+            android:textColor="#000000"
+            app:cornerRadius="10dp" />
+
+        <!-- Zepto Test -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSheetTestZepto"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="#8027EA"
+            android:text="Test Zepto (6 mins remaining)"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            app:cornerRadius="10dp" />
+
+        <!-- JioMart Test -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSheetTestJioMart"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="#008ECC"
+            android:text="Test JioMart (25 mins remaining)"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            app:cornerRadius="10dp" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:text="ARRIVAL &amp; PROXIMITY ALERTS"
+        android:textColor="#7A7E85"
+        android:textSize="11sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical">
+
+        <!-- Swiggy Captain Near -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSheetTestCaptainNear"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:backgroundTint="#FF6F00"
+            android:text="🛵 Swiggy Captain Near (Popup + Vibrate)"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            app:cornerRadius="10dp" />
+
+        <!-- Rider At Doorstep -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSheetTestArrival"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="#4CAF50"
+            android:text="🚨 Rider At Doorstep (Vibrate Ring)"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            app:cornerRadius="10dp" />
+
+        <!-- Clear Orders -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSheetClearOrders"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:text="Clear / Mark Order Delivered"
+            android:textAllCaps="false"
+            android:textColor="#FF5252"
+            app:cornerRadius="10dp"
+            app:strokeColor="#FF5252" />
+    </LinearLayout>
+
+    <!-- Bottom Spacing -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="24dp" />
+
+</LinearLayout>

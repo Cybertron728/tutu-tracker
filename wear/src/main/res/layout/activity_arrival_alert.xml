@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootAlertLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- Edge-to-Edge Animated Branded Countdown Ring -->
+    <com.deliverytracker.wear.CircularProgressView
+        android:id="@+id/circularCountdownView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Center Content -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp">
+
+        <!-- Brand Badge -->
+        <TextView
+            android:id="@+id/txtAlertBrand"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SWIGGY"
+            android:textColor="#FC8019"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <!-- Main Alert Headline -->
+        <TextView
+            android:id="@+id/txtAlertMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center"
+            android:text="Captain is near you!"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Store / Restaurant Title -->
+        <TextView
+            android:id="@+id/txtAlertTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="center"
+            android:maxLines="1"
+            android:text="Truffles Burgers"
+            android:textColor="#A1A1AA"
+            android:textSize="11sp" />
+
+        <!-- Countdown Seconds & Tap to Dismiss -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txtSecondsRemaining"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="5s"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:text="Tap to dismiss"
+                android:textColor="#71717A"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>
