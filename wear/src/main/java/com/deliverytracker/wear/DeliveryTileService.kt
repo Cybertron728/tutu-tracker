@@ -27,10 +27,10 @@ class DeliveryTileService : TileService() {
     override fun onTileRequest(requestParams: RequestBuilders.TileRequest): ListenableFuture<TileBuilders.Tile> {
         val state = DeliveryDataRepository.getDeliveryState(this)
 
-        val tile = if (!state.isActive) {
-            buildIdleTile()
-        } else {
-            buildActiveTile(state)
+        val tile = when {
+            !state.isActive -> buildIdleTile()
+            DeliveryDataRepository.isTileConfirmingClear(this) -> buildConfirmClearTile(state)
+            else -> buildActiveTile(state)
         }
 
         return Futures.immediateFuture(tile)
@@ -215,6 +215,53 @@ class DeliveryTileService : TileService() {
             )
         }
 
+        // Discrete "✕ Clear" Button Pill
+        val clearClickAction = ModifiersBuilders.Clickable.Builder()
+            .setOnClick(
+                ActionBuilders.LaunchAction.Builder()
+                    .setAndroidActivity(
+                        ActionBuilders.AndroidActivity.Builder()
+                            .setPackageName(packageName)
+                            .setClassName(ClearPromptActivity::class.java.name)
+                            .build()
+                    )
+                    .build()
+            )
+            .build()
+
+        val clearButtonModifiers = ModifiersBuilders.Modifiers.Builder()
+            .setClickable(clearClickAction)
+            .setPadding(
+                ModifiersBuilders.Padding.Builder()
+                    .setStart(dp(8f))
+                    .setEnd(dp(8f))
+                    .setTop(dp(2f))
+                    .setBottom(dp(2f))
+                    .build()
+            )
+            .setBackground(
+                ModifiersBuilders.Background.Builder()
+                    .setColor(argb(0xFF262A34.toInt()))
+                    .setCorner(ModifiersBuilders.Corner.Builder().setRadius(dp(8f)).build())
+                    .build()
+            )
+            .build()
+
+        val clearButtonBox = LayoutElementBuilders.Box.Builder()
+            .setModifiers(clearButtonModifiers)
+            .addContent(
+                Text.Builder(this, "✕ Clear")
+                    .setTypography(Typography.TYPOGRAPHY_CAPTION2)
+                    .setColor(argb(0xFFA0A6B5.toInt()))
+                    .build()
+            )
+            .build()
+
+        centerColumnBuilder.addContent(
+            LayoutElementBuilders.Spacer.Builder().setHeight(dp(4f)).build()
+        )
+        centerColumnBuilder.addContent(clearButtonBox)
+
         val centerColumn = centerColumnBuilder.build()
 
         val rootBox = LayoutElementBuilders.Box.Builder()
@@ -222,6 +269,147 @@ class DeliveryTileService : TileService() {
             .setHeight(expand())
             .setModifiers(modifiers)
             .addContent(progressArc)
+            .addContent(centerColumn)
+            .build()
+
+        val layout = LayoutElementBuilders.Layout.Builder().setRoot(rootBox).build()
+        val timelineEntry = TimelineBuilders.TimelineEntry.Builder().setLayout(layout).build()
+        val timeline = TimelineBuilders.Timeline.Builder().addTimelineEntry(timelineEntry).build()
+
+        return TileBuilders.Tile.Builder()
+            .setResourcesVersion(RESOURCES_VERSION)
+            .setTileTimeline(timeline)
+            .setFreshnessIntervalMillis(60_000L)
+            .build()
+    }
+
+    private fun buildConfirmClearTile(state: WatchDeliveryState): TileBuilders.Tile {
+        val warningColor = argb(0xFFFFA726.toInt())
+
+        val warningArc = LayoutElementBuilders.Arc.Builder()
+            .setAnchorAngle(degrees(0f))
+            .setAnchorType(ARC_ANCHOR_START)
+            .addContent(
+                LayoutElementBuilders.ArcLine.Builder()
+                    .setLength(degrees(360f))
+                    .setColor(warningColor)
+                    .setThickness(dp(6f))
+                    .build()
+            )
+            .build()
+
+        val confirmClickAction = ModifiersBuilders.Clickable.Builder()
+            .setOnClick(
+                ActionBuilders.LaunchAction.Builder()
+                    .setAndroidActivity(
+                        ActionBuilders.AndroidActivity.Builder()
+                            .setPackageName(packageName)
+                            .setClassName(ClearConfirmActivity::class.java.name)
+                            .build()
+                    )
+                    .build()
+            )
+            .build()
+
+        val cancelClickAction = ModifiersBuilders.Clickable.Builder()
+            .setOnClick(
+                ActionBuilders.LaunchAction.Builder()
+                    .setAndroidActivity(
+                        ActionBuilders.AndroidActivity.Builder()
+                            .setPackageName(packageName)
+                            .setClassName(ClearCancelActivity::class.java.name)
+                            .build()
+                    )
+                    .build()
+            )
+            .build()
+
+        val yesModifiers = ModifiersBuilders.Modifiers.Builder()
+            .setClickable(confirmClickAction)
+            .setPadding(
+                ModifiersBuilders.Padding.Builder()
+                    .setStart(dp(14f))
+                    .setEnd(dp(14f))
+                    .setTop(dp(6f))
+                    .setBottom(dp(6f))
+                    .build()
+            )
+            .setBackground(
+                ModifiersBuilders.Background.Builder()
+                    .setColor(argb(0xFFE23744.toInt()))
+                    .setCorner(ModifiersBuilders.Corner.Builder().setRadius(dp(14f)).build())
+                    .build()
+            )
+            .build()
+
+        val yesButton = LayoutElementBuilders.Box.Builder()
+            .setModifiers(yesModifiers)
+            .addContent(
+                Text.Builder(this, "✓ Yes")
+                    .setTypography(Typography.TYPOGRAPHY_CAPTION1)
+                    .setColor(argb(0xFFFFFFFF.toInt()))
+                    .build()
+            )
+            .build()
+
+        val cancelModifiers = ModifiersBuilders.Modifiers.Builder()
+            .setClickable(cancelClickAction)
+            .setPadding(
+                ModifiersBuilders.Padding.Builder()
+                    .setStart(dp(14f))
+                    .setEnd(dp(14f))
+                    .setTop(dp(6f))
+                    .setBottom(dp(6f))
+                    .build()
+            )
+            .setBackground(
+                ModifiersBuilders.Background.Builder()
+                    .setColor(argb(0xFF27272A.toInt()))
+                    .setCorner(ModifiersBuilders.Corner.Builder().setRadius(dp(14f)).build())
+                    .build()
+            )
+            .build()
+
+        val cancelButton = LayoutElementBuilders.Box.Builder()
+            .setModifiers(cancelModifiers)
+            .addContent(
+                Text.Builder(this, "✕ No")
+                    .setTypography(Typography.TYPOGRAPHY_CAPTION1)
+                    .setColor(argb(0xFFFFFFFF.toInt()))
+                    .build()
+            )
+            .build()
+
+        val buttonRow = LayoutElementBuilders.Row.Builder()
+            .setVerticalAlignment(LayoutElementBuilders.VERTICAL_ALIGN_CENTER)
+            .addContent(yesButton)
+            .addContent(LayoutElementBuilders.Spacer.Builder().setWidth(dp(10f)).build())
+            .addContent(cancelButton)
+            .build()
+
+        val centerColumn = LayoutElementBuilders.Column.Builder()
+            .setHorizontalAlignment(LayoutElementBuilders.HORIZONTAL_ALIGN_CENTER)
+            .addContent(
+                Text.Builder(this, "CLEAR ORDER?")
+                    .setTypography(Typography.TYPOGRAPHY_TITLE3)
+                    .setColor(warningColor)
+                    .build()
+            )
+            .addContent(LayoutElementBuilders.Spacer.Builder().setHeight(dp(4f)).build())
+            .addContent(
+                Text.Builder(this, "Hide from watch")
+                    .setTypography(Typography.TYPOGRAPHY_CAPTION2)
+                    .setColor(argb(0xFFA1A1AA.toInt()))
+                    .build()
+            )
+            .addContent(LayoutElementBuilders.Spacer.Builder().setHeight(dp(12f)).build())
+            .addContent(buttonRow)
+            .build()
+
+        val rootBox = LayoutElementBuilders.Box.Builder()
+            .setWidth(expand())
+            .setHeight(expand())
+            .addContent(warningArc)
             .addContent(centerColumn)
             .build()
 

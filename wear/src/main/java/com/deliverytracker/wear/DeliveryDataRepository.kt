@@ -47,6 +47,8 @@ object DeliveryDataRepository {
                     editor.putString("otp", "")
                     editor.putBoolean("is_arrived", false)
                     editor.putBoolean("is_near", false)
+                    editor.remove(KEY_DISMISSED_ORDER_IDENTIFIER)
+                    editor.putBoolean(KEY_IS_CONFIRMING_CLEAR, false)
                     editor.putLong("timestamp", System.currentTimeMillis())
                 } else {
                     editor.putString("app_id", state.appId)
@@ -170,6 +172,44 @@ object DeliveryDataRepository {
                 .putLong("last_near_state_ts", state.timestamp)
                 .apply()
             return true
+        }
+    }
+
+    private const val KEY_DISMISSED_ORDER_IDENTIFIER = "dismissed_order_identifier"
+    private const val KEY_IS_CONFIRMING_CLEAR = "is_confirming_clear"
+
+    fun isTileConfirmingClear(context: Context): Boolean {
+        synchronized(lock) {
+            val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            return prefs.getBoolean(KEY_IS_CONFIRMING_CLEAR, false)
+        }
+    }
+
+    fun setTileConfirmingClear(context: Context, confirming: Boolean) {
+        synchronized(lock) {
+            val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            prefs.edit().putBoolean(KEY_IS_CONFIRMING_CLEAR, confirming).apply()
+        }
+    }
+
+    fun markOrderDismissedOnWatch(context: Context, state: WatchDeliveryState) {
+        synchronized(lock) {
+            val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            val identifier = "${state.appId}_${state.title}"
+            prefs.edit()
+                .putString(KEY_DISMISSED_ORDER_IDENTIFIER, identifier)
+                .putBoolean(KEY_IS_CONFIRMING_CLEAR, false)
+                .apply()
+        }
+    }
+
+    fun isOrderDismissedOnWatch(context: Context, state: WatchDeliveryState): Boolean {
+        if (!state.isActive) return false
+        synchronized(lock) {
+            val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            val dismissedIdentifier = prefs.getString(KEY_DISMISSED_ORDER_IDENTIFIER, "") ?: ""
+            val currentIdentifier = "${state.appId}_${state.title}"
+            return dismissedIdentifier.isNotEmpty() && dismissedIdentifier == currentIdentifier
         }
     }
 }

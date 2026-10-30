@@ -98,6 +98,12 @@ class WearDataListenerService : WearableListenerService() {
             ArrivalAlertActivity.dismissIfActive()
         }
 
+        // If user manually dismissed this order on the watch, keep watch in idle state
+        if (state.isActive && DeliveryDataRepository.isOrderDismissedOnWatch(applicationContext, state)) {
+            Log.d(TAG, "Order ${state.brandName} (${state.title}) was dismissed on watch; ignoring update")
+            return
+        }
+
         // Trigger arrival (strong) or near (gentle) alert based on status
         val isArrivedAlert = DeliveryDataRepository.checkAndMarkArrivalAlert(applicationContext, state)
         if (isArrivedAlert) {
