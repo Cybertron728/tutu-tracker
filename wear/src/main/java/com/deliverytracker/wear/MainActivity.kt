@@ -175,12 +175,12 @@ class MainActivity : AppCompatActivity() {
         val state = ordersList[currentOrderIndex.coerceIn(0, ordersList.size - 1)]
 
         if (!state.isActive) {
-            binding.txtBrandBadge.text = "DELIVERY TRACKER"
+            binding.txtBrandBadge.text = "TUTU TRACKER"
             binding.txtBrandBadge.setTextColor(0xFF71717A.toInt())
             binding.txtMinutes.text = "--"
             binding.txtStatus.text = "No active orders"
             binding.txtStatus.setTextColor(0xFFA1A1AA.toInt())
-            binding.txtTitle.text = "Waiting for notifications"
+            binding.txtTitle.text = "Requires app notification"
             binding.txtMoreOrdersPill.visibility = View.GONE
             binding.txtOtpWatch.visibility = View.GONE
             binding.circularProgressView.setProgress(0f, 0xFF27272A.toInt())

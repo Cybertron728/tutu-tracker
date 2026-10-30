@@ -73,7 +73,7 @@ class DeliveryTileService : TileService() {
             .setHorizontalAlignment(LayoutElementBuilders.HORIZONTAL_ALIGN_CENTER)
             // Header
             .addContent(
-                Text.Builder(this, "DELIVERY TRACKER")
+                Text.Builder(this, "TUTU TRACKER")
                     .setTypography(Typography.TYPOGRAPHY_CAPTION1)
                     .setColor(argb(0xFF71717A.toInt()))
                     .build()
@@ -90,6 +90,13 @@ class DeliveryTileService : TileService() {
                 Text.Builder(this, "No active orders")
                     .setTypography(Typography.TYPOGRAPHY_CAPTION2)
                     .setColor(argb(0xFFA1A1AA.toInt()))
+                    .build()
+            )
+            // Tip Line
+            .addContent(
+                Text.Builder(this, "Requires app notification")
+                    .setTypography(Typography.TYPOGRAPHY_CAPTION2)
+                    .setColor(argb(0xFF71717A.toInt()))
                     .build()
             )
             .build()

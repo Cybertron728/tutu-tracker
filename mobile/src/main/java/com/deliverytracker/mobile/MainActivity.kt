@@ -77,6 +77,12 @@ class MainActivity : AppCompatActivity() {
             refreshWatchStatus()
         }
 
+        binding.cardTroubleshooting.setOnClickListener {
+            val isExpanded = binding.layoutTroubleshootDetails.visibility == View.VISIBLE
+            binding.layoutTroubleshootDetails.visibility = if (isExpanded) View.GONE else View.VISIBLE
+            binding.imgTroubleshootChevron.animate().rotation(if (isExpanded) 0f else 180f).setDuration(200).start()
+        }
+
         // Hidden Easter Egg: Tap "Delivery Hub" 7 times to reveal Developer & Simulation Tools
         // Only accessible in debug builds; silently ignored in production.
         binding.txtAppTitle.setOnClickListener {
