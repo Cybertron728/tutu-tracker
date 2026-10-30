@@ -17,9 +17,21 @@ object DeliveryParser {
     // Clock time ETA e.g. "Delivering by 6:38 PM", "Delivery by 6:38 PM", "Arriving by 6:38"
     private val clockTimePattern = Pattern.compile("(?i)(?:delivering\\s+by|delivery\\s+by|arriving\\s+by|reaching\\s+by|estimated\\s+by)\\s*(\\d{1,2})[:.](\\d{2})\\s*(am|pm)?")
 
-    // Explicit delivery completion patterns (avoid false positives like "food preparation completed")
+    // Explicit delivery completion patterns (matches when an order has finished / been delivered)
     private val deliveredPattern = Pattern.compile(
-        "(?i)(?:order\\s+(?:has\\s+been\\s+)?delivered|delivered\\s+to\\s+you|enjoy\\s+your\\s+(?:meal|food|order|items)|successfully\\s+delivered|order\\s+completed\\s+successfully)"
+        "(?i)(?:" +
+        "(?:arrived|delivered)\\s+in\\s+\\d+\\s*(?:mins?|minutes?|secs?|seconds?)|" +
+        "(?:order|items?|package)\\s+(?:has\\s+been\\s+|is\\s+|was\\s+)?delivered\\b(?!\\s+(?:by|in|around))|" +
+        "delivered\\s+to\\s+(?:you|your|door|doorstep|gate|location)|" +
+        "(?:successfully|completed)\\s+delivered|" +
+        "delivered\\s+successfully|" +
+        "order\\s+completed|" +
+        "enjoy\\s+your\\s+(?:meal|food|order|items|groceries)|" +
+        "hope\\s+you\\s+(?:enjoy|enjoyed|like|liked|love|loved)|" +
+        "rate\\s+your\\s+(?:delivery|order|partner|rider|captain|experience)|" +
+        "how\\s+was\\s+your\\s+(?:delivery|order|food|meal)|" +
+        "(?:^|\\b)delivered[\\s!.]" +
+        ")"
     )
 
     // Arrived at location patterns (strictly requires rider/order context)
@@ -158,21 +170,22 @@ object DeliveryParser {
         // Atomically update max total minutes per order - merge() avoids TOCTOU race
         val totalMinutes = appMaxMinutes.merge(orderKey, minutes) { old, new -> maxOf(old, new) }!!
 
+        val isArrived = isAtLocation || minutes == 0
+        val remainingMinutes = if (isArrived) 0 else minutes
+        val isNear = !isArrived && (isNearLocation || remainingMinutes in 1..2)
+
         val progress = when {
-            isAtLocation || minutes == 0 -> 1.0f
+            isArrived || remainingMinutes == 0 -> 1.0f
             isNearLocation -> 0.95f
-            totalMinutes > 0 -> ((totalMinutes - minutes).toFloat() / totalMinutes.toFloat()).coerceIn(0.05f, 0.98f)
+            totalMinutes > 0 -> ((totalMinutes - remainingMinutes).toFloat() / totalMinutes.toFloat()).coerceIn(0.05f, 0.98f)
             else -> 0.5f
         }
-
-        val isArrived = isAtLocation || minutes == 0
-        val isNear = !isArrived && (isNearLocation || minutes in 1..2)
 
         val statusText = when {
             isArrived -> "At your location!"
             isNearLocation -> if (appId == DeliveryOrder.APP_SWIGGY) "Captain is near you!" else "Delivery partner is near you!"
-            minutes <= 2 -> "Arriving in ${minutes}m"
-            minutes <= 5 -> "Almost there"
+            remainingMinutes <= 2 -> "Arriving in ${remainingMinutes}m"
+            remainingMinutes <= 5 -> "Almost there"
             text.isNotEmpty() -> text.take(30)
             else -> "Out for delivery"
         }
@@ -188,7 +201,7 @@ object DeliveryParser {
             appId = appId,
             brandName = brandName,
             colorHex = colorHex,
-            remainingMinutes = minutes,
+            remainingMinutes = remainingMinutes,
             totalMinutes = totalMinutes,
             progress = progress,
             status = statusText,

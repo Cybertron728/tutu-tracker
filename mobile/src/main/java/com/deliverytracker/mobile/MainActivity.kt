@@ -127,7 +127,7 @@ class MainActivity : AppCompatActivity() {
                 cardBinding.txtBrandBadge.backgroundTintList = ColorStateList.valueOf(order.colorHex)
 
                 // ETA display
-                if (order.remainingMinutes <= 0) {
+                if (order.remainingMinutes <= 0 || order.isArrived) {
                     cardBinding.txtEtaValue.text = "At Doorstep"
                     cardBinding.txtEtaValue.setTextColor(Color.parseColor("#4CAF50"))
                 } else {

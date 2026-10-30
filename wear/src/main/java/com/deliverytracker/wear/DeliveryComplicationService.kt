@@ -70,9 +70,12 @@ class DeliveryComplicationService : ComplicationDataSourceService() {
         mins: Int,
         progress: Float
     ): ComplicationData? {
-        val text = PlainComplicationText.Builder("${mins}m").build()
+        val displayText = if (mins <= 0) "HERE" else "${mins}m"
+        val text = PlainComplicationText.Builder(displayText).build()
         val title = PlainComplicationText.Builder(brand).build()
-        val contentDesc = PlainComplicationText.Builder("$brand delivery: $mins minutes remaining").build()
+        val contentDesc = PlainComplicationText.Builder(
+            if (mins <= 0) "$brand: Arrived at doorstep" else "$brand delivery: $mins minutes remaining"
+        ).build()
 
         return when (type) {
             ComplicationType.RANGED_VALUE -> {

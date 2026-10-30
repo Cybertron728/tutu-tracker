@@ -181,4 +181,39 @@ class DeliveryTrackerSimulationTest {
         assertFalse("Delivered order should be marked inactive", order!!.isActive)
         assertEquals("No active orders", order.status)
     }
+
+    @Test
+    fun testArrivedInEightMinutesNotificationMarkedDeliveredAndInactive() {
+        // Quick commerce completion: Zepto / Blinkit sends "Arrived in 8 minute" or "Delivered in 8 mins"
+        val notif1 = createMockNotification("Zepto", "Arrived in 8 minute! Hope you love your order")
+        val order1 = DeliveryParser.parse("com.zeptoconsumerapp", notif1, "zepto_delivered_1")
+        assertNotNull(order1)
+        assertFalse("Notification saying 'Arrived in 8 minute' must be marked INACTIVE (delivered)", order1!!.isActive)
+        assertEquals(0, order1.remainingMinutes)
+        assertEquals("No active orders", order1.status)
+
+        val notif2 = createMockNotification("Blinkit", "Delivered in 8 mins!")
+        val order2 = DeliveryParser.parse("com.grofers.customerapp", notif2, "blinkit_delivered_1")
+        assertNotNull(order2)
+        assertFalse("Notification saying 'Delivered in 8 mins' must be marked INACTIVE (delivered)", order2!!.isActive)
+        assertEquals(0, order2.remainingMinutes)
+        assertEquals("No active orders", order2.status)
+
+        val notif3 = createMockNotification("Swiggy Instamart", "Delivered in 8 minutes. Rate your delivery partner")
+        val order3 = DeliveryParser.parse("in.swiggy.android", notif3, "swiggy_delivered_1")
+        assertNotNull(order3)
+        assertFalse("Notification asking to rate partner must be marked INACTIVE", order3!!.isActive)
+        assertEquals(0, order3.remainingMinutes)
+        assertEquals("No active orders", order3.status)
+    }
+
+    @Test
+    fun testArrivalAtDoorstepAlwaysHasZeroRemainingMinutes() {
+        val notif = createMockNotification("Biryani Blues", "Captain has arrived at your doorstep! 8 mins total time")
+        val order = DeliveryParser.parse("in.swiggy.android", notif, "swiggy_doorstep_zero_mins")
+        assertNotNull(order)
+        assertTrue("isArrived should be true", order!!.isArrived)
+        assertEquals("When arrived at doorstep, remaining minutes MUST be 0 (never 8)", 0, order.remainingMinutes)
+        assertEquals("At your location!", order.status)
+    }
 }
