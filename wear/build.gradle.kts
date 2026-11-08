@@ -21,7 +21,7 @@ android {
         applicationId = "tutu.delivery.track"
         minSdk = 28 // Wear OS 2.2+ (Watch 4 Classic runs Wear OS 3.0+ / API 30+)
         targetSdk = 36
-        versionCode = 109
+        versionCode = 111
         versionName = "1.0.0"
     }
 

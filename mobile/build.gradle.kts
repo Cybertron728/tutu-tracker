@@ -21,7 +21,7 @@ android {
         applicationId = "tutu.delivery.track"
         minSdk = 26
         targetSdk = 36
-        versionCode = 108
+        versionCode = 110
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
